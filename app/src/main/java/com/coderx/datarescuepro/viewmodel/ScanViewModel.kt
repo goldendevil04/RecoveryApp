@@ -1,7 +1,7 @@
-
 package com.coderx.datarescuepro.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.coderx.datarescuepro.core.FileRecoveryEngine
 import kotlinx.coroutines.delay
@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class ScanViewModel : ViewModel() {
+class ScanViewModel(application: Application) : AndroidViewModel(application) {
     private val fileRecoveryEngine = FileRecoveryEngine()
     
     private val _scanProgress = MutableStateFlow(0f)
@@ -21,28 +21,30 @@ class ScanViewModel : ViewModel() {
     private val _foundFiles = MutableStateFlow(0)
     val foundFiles: StateFlow<Int> = _foundFiles
     
+    private val _isCompleted = MutableStateFlow(false)
+    val isCompleted: StateFlow<Boolean> = _isCompleted
+    
     fun startScan() {
         viewModelScope.launch {
-            _scanStatus.value = "Preparing scan..."
-            delay(1000)
-            
-            _scanStatus.value = "Scanning storage..."
-            for (i in 1..100) {
-                _scanProgress.value = i.toFloat()
-                _foundFiles.value = (i * 2.5).toInt()
+            try {
+                val isRooted = fileRecoveryEngine.detectRootAccess()
                 
-                when (i) {
-                    in 1..20 -> _scanStatus.value = "Scanning system directories..."
-                    in 21..40 -> _scanStatus.value = "Analyzing deleted files..."
-                    in 41..60 -> _scanStatus.value = "Checking media files..."
-                    in 61..80 -> _scanStatus.value = "Scanning documents..."
-                    in 81..99 -> _scanStatus.value = "Finalizing results..."
-                }
+                fileRecoveryEngine.performFullScan(
+                    context = getApplication(),
+                    isRooted = isRooted,
+                    onProgress = { progress, status ->
+                        _scanProgress.value = progress
+                        _scanStatus.value = status
+                        _foundFiles.value = (progress * 250).toInt() // Simulate found files
+                    }
+                )
                 
-                delay(50)
+                delay(500) // Brief pause before completion
+                _isCompleted.value = true
+                
+            } catch (e: Exception) {
+                _scanStatus.value = "Scan failed: ${e.message}"
             }
-            
-            _scanStatus.value = "completed"
         }
     }
 }

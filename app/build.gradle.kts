@@ -1,4 +1,3 @@
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -87,10 +86,7 @@ dependencies {
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
     
-    // AdMob
-    implementation(libs.google.ads)
-    
-    // Image loading
+    // Image loading with Coil
     implementation("io.coil-kt:coil-compose:2.5.0")
     
     // Testing

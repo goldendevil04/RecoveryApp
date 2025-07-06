@@ -1,20 +1,29 @@
 package com.coderx.datarescuepro.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.coderx.datarescuepro.data.model.FileType
 import com.coderx.datarescuepro.data.model.RecoverableFile
+import java.io.File
 
 @Composable
 fun FilePreviewCard(
@@ -26,7 +35,8 @@ fun FilePreviewCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 4.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        shape = RoundedCornerShape(12.dp)
     ) {
         Row(
             modifier = Modifier
@@ -34,12 +44,33 @@ fun FilePreviewCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = getFileTypeIcon(file.type),
-                contentDescription = null,
-                modifier = Modifier.size(40.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
+            // File preview/thumbnail
+            Box(
+                modifier = Modifier
+                    .size(60.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                contentAlignment = Alignment.Center
+            ) {
+                if (file.thumbnailPath != null && File(file.thumbnailPath).exists()) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(file.thumbnailPath)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = "File preview",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        imageVector = getFileTypeIcon(file.type),
+                        contentDescription = null,
+                        modifier = Modifier.size(32.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
             
             Spacer(modifier = Modifier.width(16.dp))
             
@@ -49,25 +80,54 @@ fun FilePreviewCard(
                 Text(
                     text = file.name,
                     style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+                
+                Spacer(modifier = Modifier.height(4.dp))
+                
                 Text(
                     text = "${file.formattedSize} • ${file.formattedDate}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Text(
-                    text = "Confidence: ${(file.recoveryConfidence * 100).toInt()}%",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                
+                Spacer(modifier = Modifier.height(4.dp))
+                
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .background(
+                                color = file.confidenceColor,
+                                shape = RoundedCornerShape(4.dp)
+                            )
+                    )
+                    
+                    Spacer(modifier = Modifier.width(6.dp))
+                    
+                    Text(
+                        text = "${(file.recoveryConfidence * 100).toInt()}% confidence",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = file.confidenceColor
+                    )
+                }
             }
             
             Button(
                 onClick = onRecoverClick,
-                modifier = Modifier.padding(start = 8.dp)
+                modifier = Modifier.padding(start = 8.dp),
+                shape = RoundedCornerShape(8.dp)
             ) {
+                Icon(
+                    imageVector = Icons.Default.Download,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
                 Text("Recover")
             }
         }
@@ -81,12 +141,11 @@ fun FileTypeFilterChips(
     modifier: Modifier = Modifier
 ) {
     val filters = listOf(
-        "all" to "All",
+        "all" to "All Files",
         "images" to "Images", 
         "videos" to "Videos",
         "audio" to "Audio",
-        "documents" to "Documents",
-        "others" to "Others"
+        "documents" to "Documents"
     )
     
     LazyRow(
@@ -98,7 +157,21 @@ fun FileTypeFilterChips(
             FilterChip(
                 selected = selectedFilter == key,
                 onClick = { onFilterSelected(key) },
-                label = { Text(label) }
+                label = { 
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.bodyMedium
+                    ) 
+                },
+                leadingIcon = if (selectedFilter == key) {
+                    {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                } else null
             )
         }
     }
@@ -126,44 +199,71 @@ fun ScanProgressIndicator(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        CircularProgressIndicator(
-            progress = progress,
-            modifier = Modifier.size(80.dp),
-            strokeWidth = 6.dp
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "${(progress * 100).toInt()}%",
-            style = MaterialTheme.typography.headlineMedium
-        )
+        Box(
+            modifier = Modifier.size(120.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(
+                progress = progress,
+                modifier = Modifier.fillMaxSize(),
+                strokeWidth = 8.dp,
+                color = MaterialTheme.colorScheme.primary
+            )
+            
+            Text(
+                text = "${(progress * 100).toInt()}%",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        
         Text(
             text = status,
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontWeight = FontWeight.Medium
         )
     }
 }
 
 @Composable
-fun AdBanner(
+fun StatsCard(
+    title: String,
+    value: String,
+    icon: ImageVector,
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(60.dp)
-            .padding(horizontal = 16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+        modifier = modifier,
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        shape = RoundedCornerShape(12.dp)
     ) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
+        Column(
+            modifier = Modifier.padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
             Text(
-                text = "Advertisement Space",
-                style = MaterialTheme.typography.bodyMedium,
+                text = value,
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+            
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }

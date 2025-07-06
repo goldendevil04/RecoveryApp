@@ -1,8 +1,11 @@
-
 package com.coderx.datarescuepro.core
 
 import android.content.Context
 import android.database.Cursor
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.media.MediaMetadataRetriever
+import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
@@ -35,26 +38,35 @@ class FileRecoveryEngine {
 
     fun detectRootAccess(): Boolean = nativeDetectRoot()
 
-    suspend fun performFullScan(context: Context, isRooted: Boolean = false): List<RecoverableFile> = withContext(Dispatchers.IO) {
+    suspend fun performFullScan(
+        context: Context, 
+        isRooted: Boolean = false,
+        onProgress: (Float, String) -> Unit = { _, _ -> }
+    ): List<RecoverableFile> = withContext(Dispatchers.IO) {
         val allFiles = mutableListOf<RecoverableFile>()
 
         try {
-            // Scan media files using MediaStore
+            onProgress(0.1f, "Scanning media files...")
             allFiles.addAll(scanMediaFiles(context))
 
-            // Scan accessible storage areas
+            onProgress(0.3f, "Scanning accessible storage...")
             allFiles.addAll(scanAccessibleFiles(context))
 
-            // Scan recently deleted files
+            onProgress(0.5f, "Searching recently deleted files...")
             allFiles.addAll(scanRecentlyDeletedFiles(context))
 
-            // Scan cache and temporary files
+            onProgress(0.7f, "Scanning cache and temporary files...")
             allFiles.addAll(scanTemporaryFiles(context))
 
-            // If rooted, perform deep system scan
+            onProgress(0.8f, "Performing deep scan...")
+            allFiles.addAll(performDeepScan(context))
+
             if (isRooted) {
+                onProgress(0.9f, "Performing root scan...")
                 allFiles.addAll(performRootScan(context))
             }
+
+            onProgress(1.0f, "Scan completed")
 
         } catch (e: Exception) {
             Log.e(TAG, "Error during full scan", e)
@@ -103,7 +115,8 @@ class FileRecoveryEngine {
                                     lastModified = dateModified * 1000,
                                     recoveryLocation = "Media Store",
                                     recoveryConfidence = 0.95f,
-                                    recoveryCategory = RecoveryCategory.MEDIA_STORE
+                                    recoveryCategory = RecoveryCategory.MEDIA_STORE,
+                                    thumbnailPath = generateThumbnail(path, fileType)
                                 )
                             )
                         }
@@ -124,7 +137,7 @@ class FileRecoveryEngine {
             // Scan external storage
             val externalDir = Environment.getExternalStorageDirectory()
             if (externalDir.exists() && externalDir.canRead()) {
-                scanDirectoryRecursively(externalDir, files, maxDepth = 5)
+                scanDirectoryRecursively(externalDir, files, maxDepth = 3)
             }
 
             // Scan Downloads folder
@@ -155,13 +168,14 @@ class FileRecoveryEngine {
                 File(Environment.getExternalStorageDirectory(), ".trash"),
                 File(Environment.getExternalStorageDirectory(), ".recycle"),
                 File(Environment.getExternalStorageDirectory(), "Android/data/.deleted"),
-                File(context.cacheDir, ".deleted")
+                File(context.cacheDir, ".deleted"),
+                File(Environment.getExternalStorageDirectory(), ".thumbnails/.deleted")
             )
 
             trashDirs.forEach { trashDir ->
                 if (trashDir.exists() && trashDir.canRead()) {
                     trashDir.listFiles()?.forEach { file ->
-                        if (file.isFile) {
+                        if (file.isFile && file.length() > 0) {
                             recoveredFiles.add(createRecoverableFile(file, "Recently Deleted", RecoveryCategory.RECENTLY_DELETED))
                         }
                     }
@@ -183,14 +197,15 @@ class FileRecoveryEngine {
             val cacheDirs = listOf(
                 context.cacheDir,
                 context.externalCacheDir,
-                File(Environment.getExternalStorageDirectory(), "Android/data/${context.packageName}/cache")
+                File(Environment.getExternalStorageDirectory(), "Android/data/${context.packageName}/cache"),
+                File(Environment.getExternalStorageDirectory(), ".thumbnails")
             )
 
             cacheDirs.forEach { cacheDir ->
                 cacheDir?.let { dir ->
                     if (dir.exists() && dir.canRead()) {
                         dir.listFiles()?.forEach { file ->
-                            if (file.isFile && file.length() > 0) {
+                            if (file.isFile && file.length() > 1024) { // Only files > 1KB
                                 recoveredFiles.add(createRecoverableFile(file, "Cache Files", RecoveryCategory.CACHE_FILES))
                             }
                         }
@@ -200,6 +215,29 @@ class FileRecoveryEngine {
 
         } catch (e: Exception) {
             Log.e(TAG, "Error scanning temporary files", e)
+        }
+
+        recoveredFiles
+    }
+
+    private suspend fun performDeepScan(context: Context): List<RecoverableFile> = withContext(Dispatchers.IO) {
+        val recoveredFiles = mutableListOf<RecoverableFile>()
+
+        try {
+            // Use native deep scan for better performance
+            val scanResults = nativeDeepScan(Environment.getExternalStorageDirectory().absolutePath, false)
+            
+            // Simulate finding files based on scan results
+            scanResults.forEach { result ->
+                // This would be replaced with actual file recovery logic
+                val simulatedFile = File(Environment.getExternalStorageDirectory(), "recovered_file_$result.tmp")
+                if (simulatedFile.exists()) {
+                    recoveredFiles.add(createRecoverableFile(simulatedFile, "Deep Scan", RecoveryCategory.DEEP_SCAN))
+                }
+            }
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Error during deep scan", e)
         }
 
         recoveredFiles
@@ -272,7 +310,8 @@ class FileRecoveryEngine {
             lastModified = file.lastModified(),
             recoveryLocation = location,
             recoveryConfidence = confidence,
-            recoveryCategory = category
+            recoveryCategory = category,
+            thumbnailPath = generateThumbnail(file.absolutePath, fileType)
         )
     }
 
@@ -282,15 +321,91 @@ class FileRecoveryEngine {
             "jpg", "jpeg" -> FileType.JPEG
             "png" -> FileType.PNG
             "gif" -> FileType.GIF
-            "mp4", "avi", "mkv" -> FileType.MP4
-            "mp3", "wav", "flac" -> FileType.MP3
+            "mp4", "avi", "mkv", "mov" -> FileType.MP4
+            "mp3", "wav", "flac", "aac" -> FileType.MP3
             "pdf" -> FileType.PDF
-            "zip", "rar" -> FileType.ZIP
+            "zip", "rar", "7z" -> FileType.ZIP
             "doc" -> FileType.DOC
             "docx" -> FileType.DOCX
             "xls" -> FileType.XLS
             "xlsx" -> FileType.XLSX
-            else -> FileType.UNKNOWN
+            else -> {
+                // Use native file type detection for unknown extensions
+                try {
+                    val signature = ByteArray(16)
+                    FileInputStream(file).use { it.read(signature) }
+                    val nativeType = nativeIdentifyFileType(signature)
+                    FileType.values().getOrNull(nativeType) ?: FileType.UNKNOWN
+                } catch (e: Exception) {
+                    FileType.UNKNOWN
+                }
+            }
+        }
+    }
+
+    private fun generateThumbnail(filePath: String, fileType: FileType): String? {
+        return try {
+            when (fileType) {
+                FileType.IMAGE, FileType.JPEG, FileType.PNG, FileType.GIF -> {
+                    generateImageThumbnail(filePath)
+                }
+                FileType.VIDEO, FileType.MP4 -> {
+                    generateVideoThumbnail(filePath)
+                }
+                else -> null
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error generating thumbnail for $filePath", e)
+            null
+        }
+    }
+
+    private fun generateImageThumbnail(imagePath: String): String? {
+        return try {
+            val options = BitmapFactory.Options().apply {
+                inSampleSize = 4 // Reduce size
+                inJustDecodeBounds = false
+            }
+            
+            val bitmap = BitmapFactory.decodeFile(imagePath, options)
+            if (bitmap != null) {
+                val thumbnailDir = File(Environment.getExternalStorageDirectory(), "DataRescue/thumbnails")
+                if (!thumbnailDir.exists()) thumbnailDir.mkdirs()
+                
+                val thumbnailFile = File(thumbnailDir, "thumb_${File(imagePath).nameWithoutExtension}.jpg")
+                FileOutputStream(thumbnailFile).use { out ->
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 80, out)
+                }
+                bitmap.recycle()
+                thumbnailFile.absolutePath
+            } else null
+        } catch (e: Exception) {
+            Log.e(TAG, "Error creating image thumbnail", e)
+            null
+        }
+    }
+
+    private fun generateVideoThumbnail(videoPath: String): String? {
+        return try {
+            val retriever = MediaMetadataRetriever()
+            retriever.setDataSource(videoPath)
+            val bitmap = retriever.getFrameAtTime(1000000) // 1 second
+            retriever.release()
+            
+            if (bitmap != null) {
+                val thumbnailDir = File(Environment.getExternalStorageDirectory(), "DataRescue/thumbnails")
+                if (!thumbnailDir.exists()) thumbnailDir.mkdirs()
+                
+                val thumbnailFile = File(thumbnailDir, "thumb_${File(videoPath).nameWithoutExtension}.jpg")
+                FileOutputStream(thumbnailFile).use { out ->
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 80, out)
+                }
+                bitmap.recycle()
+                thumbnailFile.absolutePath
+            } else null
+        } catch (e: Exception) {
+            Log.e(TAG, "Error creating video thumbnail", e)
+            null
         }
     }
 

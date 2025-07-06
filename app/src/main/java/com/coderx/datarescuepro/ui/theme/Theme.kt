@@ -1,4 +1,3 @@
-
 package com.coderx.datarescuepro.ui.theme
 
 import android.app.Activity
@@ -17,21 +16,29 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = DarkPrimary,
+    primaryContainer = DarkPrimaryVariant,
+    secondary = DarkSecondary,
+    surface = DarkSurface,
+    background = DarkBackground,
+    onSurface = DarkOnSurface,
+    onBackground = DarkOnBackground
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    primary = Primary,
+    primaryContainer = PrimaryVariant,
+    secondary = Secondary,
+    surface = Surface,
+    background = Background,
+    onSurface = OnSurface,
+    onBackground = OnBackground
 )
 
 @Composable
 fun DataRescueProTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false, // Disabled for consistent branding
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -39,10 +46,10 @@ fun DataRescueProTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
+    
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {

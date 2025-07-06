@@ -1,4 +1,3 @@
-
 #ifndef FILE_RECOVERY_ENGINE_H
 #define FILE_RECOVERY_ENGINE_H
 
@@ -19,7 +18,15 @@ private:
     bool checkSuBinary();
     bool checkRootFiles();
     bool checkSystemPartition();
+    bool checkRootProperties();
     int detectFileTypeBySignature(const uint8_t* data, size_t size);
+    
+    // Enhanced scanning methods
+    std::vector<int> scanForDeletedFiles(const char* path);
+    std::vector<int> scanUnallocatedSpace(const char* path);
+    std::vector<int> scanRecentlyDeletedFiles(const char* path);
+    std::vector<int> scanCacheDirectories(const char* path);
+    std::vector<int> performRootSpecificScan();
 };
 
 // File type constants

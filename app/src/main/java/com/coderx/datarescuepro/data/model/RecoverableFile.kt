@@ -1,4 +1,3 @@
-
 package com.coderx.datarescuepro.data.model
 
 import java.text.SimpleDateFormat
@@ -22,7 +21,8 @@ data class RecoverableFile(
     val isRecoverable: Boolean = true,
     val recoveryLocation: String,
     val recoveryConfidence: Float,
-    val recoveryCategory: RecoveryCategory
+    val recoveryCategory: RecoveryCategory,
+    val thumbnailPath: String? = null
 ) {
     val formattedSize: String
         get() {
@@ -36,4 +36,11 @@ data class RecoverableFile(
 
     val formattedDate: String
         get() = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault()).format(Date(lastModified))
+
+    val confidenceColor: androidx.compose.ui.graphics.Color
+        get() = when {
+            recoveryConfidence >= 0.8f -> androidx.compose.ui.graphics.Color(0xFF4CAF50)
+            recoveryConfidence >= 0.6f -> androidx.compose.ui.graphics.Color(0xFFFF9800)
+            else -> androidx.compose.ui.graphics.Color(0xFFE53935)
+        }
 }

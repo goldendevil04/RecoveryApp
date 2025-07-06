@@ -1,13 +1,11 @@
-
 package com.coderx.datarescuepro.ui.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Security
-import androidx.compose.material.icons.filled.Storage
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import com.coderx.datarescuepro.core.FileRecoveryEngine
 import com.coderx.datarescuepro.data.model.DeviceInfo
 import com.coderx.datarescuepro.ui.components.AnimatedPulse
-import com.coderx.datarescuepro.ui.components.GradientBackground
+import com.coderx.datarescuepro.ui.components.StatsCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,185 +33,209 @@ fun MainScreen(
         isRooted = fileRecoveryEngine.detectRootAccess()
     }
 
-    GradientBackground {
-        Column(
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Header
+        Card(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxWidth()
+                .padding(bottom = 24.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer
+            )
         ) {
-            // Header
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 24.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Column(
-                    modifier = Modifier.padding(20.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "📱",
-                        style = MaterialTheme.typography.displayLarge
-                    )
-                    
-                    Spacer(modifier = Modifier.height(8.dp))
-                    
-                    Text(
-                        text = "DataRescue Pro",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    
-                    Text(
-                        text = "Professional File Recovery",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-
-            // Device Information
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 24.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(bottom = 12.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Storage,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Device Information",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                    
-                    deviceInfo?.let { info ->
-                        DeviceInfoItem(
-                            label = "Device",
-                            value = "${info.manufacturer} ${info.model}"
-                        )
-                        DeviceInfoItem(
-                            label = "Android Version",
-                            value = "Android ${info.androidVersion} (API ${info.apiLevel})"
-                        )
-                        DeviceInfoItem(
-                            label = "Storage",
-                            value = "${info.formatStorage(info.availableStorage)} / ${info.formatStorage(info.totalStorage)}"
-                        )
-                        DeviceInfoItem(
-                            label = "CPU Architecture",
-                            value = info.cpuArchitecture
-                        )
-                        
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 8.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Security,
-                                contentDescription = null,
-                                tint = if (isRooted) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
-                            )
-                            Text(
-                                text = if (isRooted) "Root Access Detected" else "No Root Access",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = if (isRooted) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                    }
-                }
-            }
-
-            // Quick Stats
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 32.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                QuickStatCard(
-                    title = "Recovery Rate",
-                    value = "85%",
-                    modifier = Modifier.weight(1f)
+                Icon(
+                    imageVector = Icons.Default.Security,
+                    contentDescription = null,
+                    modifier = Modifier.size(48.dp),
+                    tint = MaterialTheme.colorScheme.primary
                 )
-                QuickStatCard(
-                    title = "Scan Speed",
-                    value = "Fast",
-                    modifier = Modifier.weight(1f)
+                
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                Text(
+                    text = "DataRescue Pro",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
                 )
-                QuickStatCard(
-                    title = "File Types",
-                    value = "12+",
-                    modifier = Modifier.weight(1f)
+                
+                Text(
+                    text = "Professional File Recovery Solution",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
+        }
 
-            // Main Action Button
-            AnimatedPulse {
-                Button(
-                    onClick = onNavigateToScan,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary
-                    )
+        // Quick Stats
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 24.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            StatsCard(
+                title = "Recovery Rate",
+                value = "95%",
+                icon = Icons.Default.TrendingUp,
+                modifier = Modifier.weight(1f)
+            )
+            StatsCard(
+                title = "File Types",
+                value = "12+",
+                icon = Icons.Default.Folder,
+                modifier = Modifier.weight(1f)
+            )
+            StatsCard(
+                title = "Speed",
+                value = "Fast",
+                icon = Icons.Default.Speed,
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        // Device Status
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 24.dp),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(bottom = 12.dp)
                 ) {
+                    Icon(
+                        imageVector = Icons.Default.PhoneAndroid,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Start Recovery Scan",
+                        text = "Device Status",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
                 }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Features List
-            Card(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(
-                        text = "Recovery Features",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(bottom = 12.dp)
+                
+                deviceInfo?.let { info ->
+                    DeviceInfoRow(
+                        label = "Device",
+                        value = "${info.manufacturer} ${info.model}"
+                    )
+                    DeviceInfoRow(
+                        label = "Storage",
+                        value = "${info.formatStorage(info.availableStorage)} available"
                     )
                     
-                    FeatureItem("📷", "Photo Recovery", "Recover deleted photos from gallery")
-                    FeatureItem("🎵", "Audio Recovery", "Restore lost music and audio files")
-                    FeatureItem("🎬", "Video Recovery", "Recover deleted video files")
-                    FeatureItem("📄", "Document Recovery", "Restore lost documents and files")
-                    FeatureItem("🗂️", "Deep Scan", "Advanced recovery algorithms")
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = if (isRooted) Icons.Default.Security else Icons.Default.Shield,
+                            contentDescription = null,
+                            tint = if (isRooted) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Text(
+                            text = if (isRooted) "Root Access Available" else "Standard Access",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = if (isRooted) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+                        )
+                    }
                 }
+            }
+        }
+
+        // Main Action Button
+        AnimatedPulse {
+            Button(
+                onClick = onNavigateToScan,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Start File Recovery",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Features
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(
+                    text = "Recovery Capabilities",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+                
+                FeatureItem(
+                    icon = Icons.Default.Image,
+                    title = "Photo Recovery",
+                    description = "Recover deleted photos and images"
+                )
+                FeatureItem(
+                    icon = Icons.Default.VideoFile,
+                    title = "Video Recovery", 
+                    description = "Restore lost video files"
+                )
+                FeatureItem(
+                    icon = Icons.Default.AudioFile,
+                    title = "Audio Recovery",
+                    description = "Recover music and audio files"
+                )
+                FeatureItem(
+                    icon = Icons.Default.Description,
+                    title = "Document Recovery",
+                    description = "Restore documents and files"
+                )
             }
         }
     }
 }
 
 @Composable
-private fun DeviceInfoItem(
+private fun DeviceInfoRow(
     label: String,
     value: String
 ) {
@@ -237,37 +259,8 @@ private fun DeviceInfoItem(
 }
 
 @Composable
-private fun QuickStatCard(
-    title: String,
-    value: String,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier,
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = value,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-@Composable
 private fun FeatureItem(
-    icon: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
     title: String,
     description: String
 ) {
@@ -277,11 +270,15 @@ private fun FeatureItem(
             .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = icon,
-            style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier.padding(end = 12.dp)
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(24.dp),
+            tint = MaterialTheme.colorScheme.primary
         )
+        
+        Spacer(modifier = Modifier.width(12.dp))
+        
         Column {
             Text(
                 text = title,
