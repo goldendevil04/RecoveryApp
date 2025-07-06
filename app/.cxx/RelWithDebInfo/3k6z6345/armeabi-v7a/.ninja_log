@@ -1,0 +1,6 @@
+# ninja log v5
+0	233	1751819058815855675	CMakeFiles/datarescuepro.dir/native-lib.cpp.o	13f1d485d9674c57
+0	242	1751819058825164994	CMakeFiles/datarescuepro.dir/file_recovery_engine.cpp.o	14bed201ad58c023
+0	243	1751819058826744359	CMakeFiles/datarescuepro.dir/disk_scanner.cpp.o	ea9bb33621208197
+0	315	1751819058897386972	CMakeFiles/datarescuepro.dir/file_scanner.cpp.o	76ed8541e09acab1
+315	350	1751819058932153385	/Users/nurkausaralam/Downloads/RecoveryApp-1 4/app/build/intermediates/cxx/RelWithDebInfo/3k6z6345/obj/armeabi-v7a/libdatarescuepro.so	862c61dd1f6abe77
