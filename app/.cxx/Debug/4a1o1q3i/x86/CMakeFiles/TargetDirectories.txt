@@ -1,0 +1,3 @@
+/Users/nurkausaralam/Downloads/RecoveryApp-1/app/.cxx/Debug/4a1o1q3i/x86/CMakeFiles/datarescuepro.dir
+/Users/nurkausaralam/Downloads/RecoveryApp-1/app/.cxx/Debug/4a1o1q3i/x86/CMakeFiles/edit_cache.dir
+/Users/nurkausaralam/Downloads/RecoveryApp-1/app/.cxx/Debug/4a1o1q3i/x86/CMakeFiles/rebuild_cache.dir
