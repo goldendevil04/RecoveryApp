@@ -1,3 +1,0 @@
-/Users/nurkausaralam/Downloads/project 12/app/.cxx/RelWithDebInfo/225u53u6/armeabi-v7a/CMakeFiles/datarescue.dir
-/Users/nurkausaralam/Downloads/project 12/app/.cxx/RelWithDebInfo/225u53u6/armeabi-v7a/CMakeFiles/edit_cache.dir
-/Users/nurkausaralam/Downloads/project 12/app/.cxx/RelWithDebInfo/225u53u6/armeabi-v7a/CMakeFiles/rebuild_cache.dir

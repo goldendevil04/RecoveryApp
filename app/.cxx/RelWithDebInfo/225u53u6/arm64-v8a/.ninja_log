@@ -1,5 +1,0 @@
-# ninja log v5
-0	394	1751811329440178973	CMakeFiles/datarescue.dir/datarescue.cpp.o	84992a382e568f14
-0	468	1751811329514830515	CMakeFiles/datarescue.dir/disk_analyzer.cpp.o	4d1e6f3c989aa780
-0	572	1751811329612824835	CMakeFiles/datarescue.dir/file_scanner.cpp.o	58d3d66c316fc89b
-572	655	1751811329682884047	/Users/nurkausaralam/Downloads/project 12/app/build/intermediates/cxx/RelWithDebInfo/225u53u6/obj/arm64-v8a/libdatarescue.so	3be176d93bc67873
