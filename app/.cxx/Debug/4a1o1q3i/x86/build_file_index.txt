@@ -1,1 +1,0 @@
-/Users/nurkausaralam/Downloads/RecoveryApp-1/app/src/main/cpp/CMakeLists.txt
