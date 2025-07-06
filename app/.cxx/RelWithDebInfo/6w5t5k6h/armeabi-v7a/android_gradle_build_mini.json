@@ -1,0 +1,27 @@
+{
+  "buildFiles": [
+    "/Users/nurkausaralam/Downloads/project 12/app/src/main/cpp/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/Users/nurkausaralam/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/Users/nurkausaralam/Downloads/project 12/app/.cxx/RelWithDebInfo/6w5t5k6h/armeabi-v7a",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/Users/nurkausaralam/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/Users/nurkausaralam/Downloads/project 12/app/.cxx/RelWithDebInfo/6w5t5k6h/armeabi-v7a",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "datarescue::@6890427a1f51a3e7e1df": {
+      "artifactName": "datarescue",
+      "abi": "armeabi-v7a",
+      "output": "/Users/nurkausaralam/Downloads/project 12/app/build/intermediates/cxx/RelWithDebInfo/6w5t5k6h/obj/armeabi-v7a/libdatarescue.so",
+      "runtimeFiles": []
+    }
+  }
+}

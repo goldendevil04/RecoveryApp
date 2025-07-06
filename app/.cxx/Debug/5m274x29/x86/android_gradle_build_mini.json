@@ -1,0 +1,27 @@
+{
+  "buildFiles": [
+    "/Users/nurkausaralam/Downloads/project 12/app/src/main/cpp/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/Users/nurkausaralam/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/Users/nurkausaralam/Downloads/project 12/app/.cxx/Debug/5m274x29/x86",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/Users/nurkausaralam/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/Users/nurkausaralam/Downloads/project 12/app/.cxx/Debug/5m274x29/x86",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "datarescue::@6890427a1f51a3e7e1df": {
+      "artifactName": "datarescue",
+      "abi": "x86",
+      "output": "/Users/nurkausaralam/Downloads/project 12/app/build/intermediates/cxx/Debug/5m274x29/obj/x86/libdatarescue.so",
+      "runtimeFiles": []
+    }
+  }
+}
